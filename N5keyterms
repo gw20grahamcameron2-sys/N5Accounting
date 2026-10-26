@@ -1,0 +1,1178 @@
+<!DOCTYPE html>
+<html lang="en" class="select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>N5 Accounting Ledger Legend - Touchscreen Classroom Edition</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        sqa: {
+                            dark: '#0f172a',
+                            card: '#1e293b',
+                            accent: '#38bdf8',
+                            gold: '#fbbf24',
+                            emerald: '#10b981',
+                            rose: '#f43f5e',
+                            purple: '#a855f7'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Touchscreen & Display Optimizations */
+        * {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* High-Contrast Touchscreen Scrollbar */
+        ::-webkit-scrollbar {
+            width: 16px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #090d16;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #3b82f6;
+            border-radius: 8px;
+            border: 3px solid #090d16;
+        }
+
+        /* Fullscreen Simulated Mode Fallback */
+        body.simulated-fullscreen {
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 999999 !important;
+            margin: 0 !important;
+            padding: 0 0 220px 0 !important;
+            background-color: #0f172a !important;
+            overflow-y: auto !important;
+        }
+
+        /* Generous Scroll Buffer Class */
+        .bottom-scroll-buffer {
+            padding-bottom: 240px !important;
+        }
+
+        /* Active touch visual feedback */
+        .touch-btn:active {
+            transform: scale(0.96);
+            filter: brightness(1.2);
+        }
+
+        /* Glow animation for active target card */
+        @keyframes subtle-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(56, 189, 248, 0.3); }
+            50% { box-shadow: 0 0 45px rgba(56, 189, 248, 0.65); }
+        }
+        .glow-active {
+            animation: subtle-glow 2s infinite;
+        }
+
+        /* Overlay Confetti Canvas */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999999;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-slate-900 text-slate-100 flex flex-col font-sans antialiased bottom-scroll-buffer">
+
+    <!-- Confetti Overlay Canvas -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <!-- MAIN APP CONTAINER -->
+    <div id="appContainer" class="flex-1 flex flex-col min-h-screen p-3 sm:p-6 max-w-7xl mx-auto w-full bottom-scroll-buffer">
+
+        <!-- HEADER & TOP CONTROLS -->
+        <header class="bg-slate-800/90 border-2 border-slate-700 rounded-3xl p-4 sm:p-6 mb-4 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <div class="bg-gradient-to-br from-cyan-500 to-blue-600 p-3 sm:p-4 rounded-2xl shadow-lg border-2 border-cyan-300/50">
+                    <!-- Ledger Icon SVG -->
+                    <svg class="w-8 h-8 sm:w-10 sm:h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 7h6m-6 4h6m-6 4h6M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-2xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400">
+                        N5 ACCOUNTING LEDGER LEGEND
+                    </h1>
+                    <p class="text-slate-400 text-sm sm:text-base font-medium">SQA National 5 Term Classifier • Touchscreen Classroom Edition</p>
+                </div>
+            </div>
+
+            <!-- Header Utility Buttons -->
+            <div class="flex flex-wrap items-center justify-center gap-2.5 w-full md:w-auto">
+                <!-- Cheat Sheet Modal Toggle Button -->
+                <button id="btnOpenCheatSheet" title="Open Quick Reference Sheet" class="touch-btn bg-slate-700 hover:bg-slate-600 text-cyan-300 border-2 border-cyan-500/50 px-3.5 py-3 rounded-2xl font-bold text-sm sm:text-base transition flex items-center gap-2 shadow-lg min-h-[52px]">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C20.832 18.477 19.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                    </svg>
+                    <span>Cheat Sheet</span>
+                </button>
+
+                <!-- DEDICATED GOOGLE SITES POP-OUT TAB BUTTON -->
+                <button id="btnPopOutTab" title="Launch in Standalone Tab for SMART Boards & Google Sites" class="touch-btn bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white border-2 border-emerald-400 px-3.5 py-3 rounded-2xl font-extrabold text-sm sm:text-base transition flex items-center gap-2 shadow-xl min-h-[52px]">
+                    <svg class="w-5 h-5 text-emerald-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                    </svg>
+                    <span>Pop Out (New Tab)</span>
+                </button>
+
+                <!-- Audio Toggle Button -->
+                <button id="btnToggleSound" class="touch-btn bg-slate-700 hover:bg-slate-600 text-slate-200 border-2 border-slate-600 px-3.5 py-3 rounded-2xl font-bold text-sm sm:text-base transition flex items-center gap-2 shadow-lg min-h-[52px]">
+                    <span id="soundIconContainer">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/>
+                        </svg>
+                    </span>
+                    <span id="soundText" class="hidden sm:inline">Sound</span>
+                </button>
+
+                <!-- Fullscreen Toggle Button -->
+                <button id="btnToggleFullscreen" class="touch-btn bg-blue-700 hover:bg-blue-600 text-white border-2 border-blue-400 px-4 py-3 rounded-2xl font-bold text-sm sm:text-base transition flex items-center gap-2 shadow-xl min-h-[52px]">
+                    <span id="fullscreenIconContainer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                        </svg>
+                    </span>
+                    <span id="fullscreenText">Full Screen</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- GOOGLE SITES IFRAME HELPER BANNER (Reminds users of Pop Out for SMART Boards) -->
+        <div id="googleSitesBanner" class="bg-indigo-950/80 border-2 border-indigo-500/60 rounded-2xl p-3 mb-4 shadow-lg flex items-center justify-between text-xs sm:text-sm text-indigo-200">
+            <div class="flex items-center gap-2">
+                <span class="text-lg">💡</span>
+                <span><strong>Using inside Google Sites or Canvas?</strong> Click <strong class="text-teal-300">"Pop Out (New Tab)"</strong> at top to launch full-screen monitor view for Interactive Whiteboards.</span>
+            </div>
+            <button onclick="document.getElementById('googleSitesBanner').remove()" class="touch-btn text-indigo-400 hover:text-white ml-2 font-bold p-1">✕</button>
+        </div>
+
+        <!-- GAME MODE SELECTOR BAR -->
+        <div class="bg-slate-800/80 border-2 border-slate-700 rounded-2xl p-3 mb-4 shadow-xl flex flex-wrap items-center justify-center gap-3">
+            <span class="text-slate-400 font-bold uppercase text-xs sm:text-sm tracking-wider px-2">Select Game Mode:</span>
+            <button id="btnModePractice" class="touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-cyan-500 bg-cyan-600/30 text-cyan-300 transition shadow-md">
+                🎓 Practice
+            </button>
+            <button id="btnModeTimed" class="touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-slate-600 bg-slate-700/50 text-slate-300 hover:border-amber-500 hover:text-amber-300 transition shadow-md">
+                ⚡ Beat 60s
+            </button>
+            <button id="btnModeTeam" class="touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-slate-600 bg-slate-700/50 text-slate-300 hover:border-purple-500 hover:text-purple-300 transition shadow-md">
+                ⚔️ Team Red vs Blue
+            </button>
+        </div>
+
+        <!-- DASHBOARD & SCOREBOARD STATUS BAR -->
+        <div id="dashboardBar" class="bg-slate-800/90 border-2 border-slate-700 rounded-2xl p-4 mb-4 shadow-lg flex flex-wrap items-center justify-between gap-4">
+            
+            <!-- Standard Mode Stats -->
+            <div id="standardStats" class="flex items-center gap-6 w-full sm:w-auto justify-around">
+                <div class="text-center sm:text-left">
+                    <span class="text-slate-400 text-xs sm:text-sm font-semibold uppercase tracking-wider block">Score</span>
+                    <span id="scoreVal" class="text-2xl sm:text-4xl font-black text-cyan-400">0</span>
+                </div>
+                <div class="h-8 w-0.5 bg-slate-700"></div>
+                <div class="text-center sm:text-left">
+                    <span class="text-slate-400 text-xs sm:text-sm font-semibold uppercase tracking-wider block">Streak</span>
+                    <span id="streakVal" class="text-2xl sm:text-4xl font-black text-amber-400">0 🔥</span>
+                </div>
+                <div class="h-8 w-0.5 bg-slate-700"></div>
+                <div class="text-center sm:text-left">
+                    <span class="text-slate-400 text-xs sm:text-sm font-semibold uppercase tracking-wider block">Progress</span>
+                    <span id="progressVal" class="text-2xl sm:text-4xl font-black text-purple-400">1/34</span>
+                </div>
+            </div>
+
+            <!-- Timed Countdown Bar (Hidden by default) -->
+            <div id="timedStats" class="hidden flex-1 w-full max-w-md mx-auto flex items-center gap-4">
+                <span class="text-amber-400 font-extrabold text-xl sm:text-2xl whitespace-nowrap">⏳ Time Left:</span>
+                <div class="flex-1 bg-slate-900 border-2 border-amber-500/50 h-7 rounded-full overflow-hidden p-0.5">
+                    <div id="timerProgressBar" class="bg-gradient-to-r from-amber-500 to-rose-500 h-full rounded-full transition-all duration-300 w-full"></div>
+                </div>
+                <span id="timerText" class="text-2xl font-black text-amber-300 min-w-[45px]">60s</span>
+            </div>
+
+            <!-- Team Scoreboard (Hidden by default) -->
+            <div id="teamStats" class="hidden w-full flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center justify-between w-full sm:w-auto gap-8">
+                    <!-- Team Red -->
+                    <div id="teamRedBox" class="bg-rose-950/80 border-4 border-rose-500 rounded-2xl px-6 py-2 text-center flex-1 sm:flex-none">
+                        <span class="text-rose-300 text-xs font-bold uppercase tracking-widest block">TEAM RED</span>
+                        <span id="teamRedScore" class="text-3xl sm:text-4xl font-black text-rose-400">0</span>
+                    </div>
+
+                    <div class="text-slate-500 font-black text-2xl">VS</div>
+
+                    <!-- Team Blue -->
+                    <div id="teamBlueBox" class="bg-blue-950/80 border-4 border-slate-700 rounded-2xl px-6 py-2 text-center flex-1 sm:flex-none">
+                        <span class="text-blue-300 text-xs font-bold uppercase tracking-widest block">TEAM BLUE</span>
+                        <span id="teamBlueScore" class="text-3xl sm:text-4xl font-black text-blue-400">0</span>
+                    </div>
+                </div>
+
+                <!-- Active Turn Banner -->
+                <div id="teamTurnBanner" class="bg-rose-600 text-white border-2 border-rose-300 px-6 py-3 rounded-2xl font-black text-lg sm:text-xl text-center shadow-lg w-full sm:w-auto">
+                    🔥 TEAM RED'S TURN
+                </div>
+            </div>
+
+        </div>
+
+        <!-- MAIN GAMEPLAY AREA -->
+        <main class="flex-1 flex flex-col justify-center gap-6 mb-12">
+
+            <!-- ACTIVE TERM QUESTION CARD -->
+            <div class="bg-slate-800/90 border-4 border-indigo-500 rounded-3xl p-6 sm:p-10 shadow-2xl glow-active flex flex-col items-center justify-center text-center relative overflow-hidden">
+                <div class="absolute top-3 left-4 text-xs sm:text-sm font-bold uppercase tracking-widest text-slate-400 flex items-center gap-1.5">
+                    <span id="stageBadge" class="bg-indigo-600 text-white px-3 py-1 rounded-lg">STAGE 1: CATEGORY</span>
+                    <span class="text-slate-500">• SQA N5 Term</span>
+                </div>
+
+                <!-- HUGE TERM DISPLAY -->
+                <div id="termTitle" class="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-wide my-4 py-2 drop-shadow-md">
+                    Loading Term...
+                </div>
+
+                <!-- Dynamic Subtitle Prompt -->
+                <p id="termPrompt" class="text-indigo-300 text-base sm:text-xl font-bold">
+                    Select the correct Statement of Financial Position or Income Statement category below:
+                </p>
+
+                <!-- Optional SQA Hint Box -->
+                <div id="hintBox" class="hidden mt-4 bg-slate-900/90 border-2 border-amber-500/50 text-amber-300 p-4 rounded-2xl text-base sm:text-lg max-w-2xl text-left">
+                    <span class="font-bold uppercase text-xs tracking-widest text-amber-400 block mb-1">💡 SQA Context Hint:</span>
+                    <span id="hintText">Hint contents...</span>
+                </div>
+
+                <button id="btnToggleHint" class="touch-btn mt-3 text-amber-400 hover:text-amber-300 underline font-semibold text-sm sm:text-base">
+                    💡 Show SQA Hint
+                </button>
+            </div>
+
+            <!-- STAGE 1: 8 CATEGORY SELECTION BUTTONS -->
+            <div id="stage1CategoryGrid" class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                
+                <!-- 1. Non-Current Assets -->
+                <button data-cat="NCA" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-cyan-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-cyan-400 uppercase tracking-wider block mb-0.5">ASSET (LONG TERM)</span>
+                    <span class="text-base sm:text-xl font-extrabold">Non-Current Assets</span>
+                </button>
+
+                <!-- 2. Current Assets -->
+                <button data-cat="CA" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-teal-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-teal-400 uppercase tracking-wider block mb-0.5">ASSET (SHORT TERM)</span>
+                    <span class="text-base sm:text-xl font-extrabold">Current Assets</span>
+                </button>
+
+                <!-- 3. Non-Current Liabilities -->
+                <button data-cat="NCL" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-purple-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-purple-400 uppercase tracking-wider block mb-0.5">DEBT (LONG TERM)</span>
+                    <span class="text-base sm:text-xl font-extrabold">Non-Current Liabilities</span>
+                </button>
+
+                <!-- 4. Current Liabilities -->
+                <button data-cat="CL" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-rose-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-rose-400 uppercase tracking-wider block mb-0.5">DEBT (SHORT TERM)</span>
+                    <span class="text-base sm:text-xl font-extrabold">Current Liabilities</span>
+                </button>
+
+                <!-- 5. Revenue / Income -->
+                <button data-cat="REV" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-emerald-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-emerald-400 uppercase tracking-wider block mb-0.5">INCOME STATEMENT</span>
+                    <span class="text-base sm:text-xl font-extrabold">Revenue / Income</span>
+                </button>
+
+                <!-- 6. Operating Expenses -->
+                <button data-cat="EXP" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-amber-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-amber-400 uppercase tracking-wider block mb-0.5">INCOME STATEMENT</span>
+                    <span class="text-base sm:text-xl font-extrabold">Operating Expenses</span>
+                </button>
+
+                <!-- 7. Cost of Sales & Purchases -->
+                <button data-cat="COS" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-orange-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-orange-400 uppercase tracking-wider block mb-0.5">TRADING ACCOUNT</span>
+                    <span class="text-base sm:text-xl font-extrabold">Purchases & Cost of Sales</span>
+                </button>
+
+                <!-- 8. Capital & Drawings -->
+                <button data-cat="CAP" class="touch-btn cat-btn bg-slate-800 hover:bg-slate-700 text-slate-100 border-4 border-indigo-500/70 rounded-2xl p-4 sm:p-5 text-center min-h-[95px] flex flex-col items-center justify-center shadow-xl transition active:scale-95">
+                    <span class="text-xs sm:text-sm font-black text-indigo-400 uppercase tracking-wider block mb-0.5">EQUITY & OWNERSHIP</span>
+                    <span class="text-base sm:text-xl font-extrabold">Capital & Drawings</span>
+                </button>
+
+            </div>
+
+            <!-- STAGE 2: BALANCE SELECTION (DEBIT vs CREDIT) (Clean tiles, no prompt labels) -->
+            <div id="stage2BalanceGrid" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- DEBIT CHOICE -->
+                <button id="btnSelectDebit" class="touch-btn bg-slate-800 hover:bg-slate-700 text-blue-300 border-4 border-blue-500 rounded-3xl p-6 sm:p-10 min-h-[120px] flex items-center justify-center shadow-2xl transition active:scale-95">
+                    <span class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-wide">DEBIT BALANCE [Dr]</span>
+                </button>
+
+                <!-- CREDIT CHOICE -->
+                <button id="btnSelectCredit" class="touch-btn bg-slate-800 hover:bg-slate-700 text-emerald-300 border-4 border-emerald-500 rounded-3xl p-6 sm:p-10 min-h-[120px] flex items-center justify-center shadow-2xl transition active:scale-95">
+                    <span class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-wide">CREDIT BALANCE [Cr]</span>
+                </button>
+            </div>
+
+            <!-- POST-ANSWER FEEDBACK DISPLAY PANEL -->
+            <div id="feedbackPanel" class="hidden bg-slate-800 border-4 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center gap-4 mb-16">
+                <!-- Correct / Incorrect Banner -->
+                <div id="feedbackBanner" class="text-3xl sm:text-5xl font-black uppercase tracking-wider">
+                    Correct!
+                </div>
+
+                <!-- DEAD CLIC Explanation -->
+                <p id="feedbackExplanation" class="text-lg sm:text-2xl text-slate-200 font-medium max-w-3xl">
+                    Explanation goes here...
+                </p>
+
+                <!-- SQA Exam Note -->
+                <div id="feedbackExamNote" class="bg-indigo-950/80 border-2 border-indigo-400/50 p-4 rounded-2xl text-indigo-200 text-base sm:text-lg max-w-3xl text-left w-full">
+                    <span class="font-black text-indigo-300 uppercase tracking-widest text-xs block mb-1">📌 SQA Exam Distinction Note:</span>
+                    <span id="examNoteText">Note contents...</span>
+                </div>
+
+                <!-- Next Button -->
+                <button id="btnNextTerm" class="touch-btn w-full max-w-md bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-2xl sm:text-3xl py-4 sm:py-5 px-8 rounded-2xl border-2 border-emerald-300 shadow-xl transition active:scale-95 min-h-[75px] mt-2">
+                    NEXT TERM ➔
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- CHEAT SHEET REFERENCE MODAL -->
+    <div id="cheatSheetModal" class="hidden fixed inset-0 z-[99999] bg-slate-950/90 backdrop-blur-md p-4 sm:p-8 overflow-y-auto flex justify-center items-start">
+        <div class="bg-slate-800 border-4 border-cyan-500 rounded-3xl p-6 sm:p-10 max-w-4xl w-full my-auto shadow-2xl text-slate-100 relative">
+            
+            <button id="btnCloseCheatSheet" class="touch-btn absolute top-4 right-4 bg-slate-700 hover:bg-slate-600 border-2 border-slate-500 text-white rounded-2xl w-12 h-12 flex items-center justify-center font-bold text-2xl">
+                ✕
+            </button>
+
+            <h2 class="text-3xl sm:text-4xl font-black text-cyan-400 mb-4 flex items-center gap-3">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C20.832 18.477 19.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                </svg>
+                SQA N5 Accounting Quick Reference
+            </h2>
+
+            <!-- DEAD CLIC GRID -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- DEAD -->
+                <div class="bg-blue-950/80 border-2 border-blue-500 p-5 rounded-2xl">
+                    <h3 class="text-2xl font-black text-blue-400 mb-2">DEBIT BALANCES [Dr] = D.E.A.D</h3>
+                    <ul class="space-y-2 text-base sm:text-lg font-semibold text-blue-100">
+                        <li>• <strong class="text-blue-300">D</strong>rawings</li>
+                        <li>• <strong class="text-blue-300">E</strong>xpenses (Operating Overhead Costs)</li>
+                        <li>• <strong class="text-blue-300">A</strong>ssets (Non-Current & Current Assets)</li>
+                        <li>• <strong class="text-blue-300">D</strong>irect Costs (Purchases & Carriage Inwards)</li>
+                    </ul>
+                </div>
+
+                <!-- CLIC -->
+                <div class="bg-emerald-950/80 border-2 border-emerald-500 p-5 rounded-2xl">
+                    <h3 class="text-2xl font-black text-emerald-400 mb-2">CREDIT BALANCES [Cr] = C.L.I.C</h3>
+                    <ul class="space-y-2 text-base sm:text-lg font-semibold text-emerald-100">
+                        <li>• <strong class="text-emerald-300">C</strong>apital</li>
+                        <li>• <strong class="text-emerald-300">L</strong>iabilities (Non-Current & Current Liabilities)</li>
+                        <li>• <strong class="text-emerald-300">I</strong>ncome & Revenue</li>
+                        <li>• <strong class="text-emerald-300">C</strong>redit Adjustments (Returns Outwards)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- SQA IAS TERMINOLOGY TABLE -->
+            <div class="mb-6 bg-slate-900 border-2 border-slate-700 rounded-2xl p-4 overflow-x-auto">
+                <h3 class="text-xl font-bold text-amber-400 mb-3">SQA IAS Terminology Standard</h3>
+                <table class="w-full text-left text-sm sm:text-base">
+                    <thead>
+                        <tr class="border-b border-slate-700 text-slate-400">
+                            <th class="p-2">Official SQA Term (Use in Exam)</th>
+                            <th class="p-2">Older / Alternative Term</th>
+                            <th class="p-2">Category</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-800 font-medium">
+                        <tr><td class="p-2 text-cyan-300 font-bold">Inventory</td><td class="p-2 text-slate-400">Stock</td><td class="p-2">Current Asset</td></tr>
+                        <tr><td class="p-2 text-cyan-300 font-bold">Trade Receivables</td><td class="p-2 text-slate-400">Debtors</td><td class="p-2">Current Asset</td></tr>
+                        <tr><td class="p-2 text-cyan-300 font-bold">Trade Payables</td><td class="p-2 text-slate-400">Creditors</td><td class="p-2">Current Liability</td></tr>
+                        <tr><td class="p-2 text-cyan-300 font-bold">Profit for the Year</td><td class="p-2 text-slate-400">Net Profit</td><td class="p-2">Income Statement</td></tr>
+                        <tr><td class="p-2 text-cyan-300 font-bold">Returns Inwards</td><td class="p-2 text-slate-400">Sales Returns</td><td class="p-2">Deducted from Revenue</td></tr>
+                        <tr><td class="p-2 text-cyan-300 font-bold">Returns Outwards</td><td class="p-2 text-slate-400">Purchases Returns</td><td class="p-2">Deducted from Purchases</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <button id="btnCloseCheatSheetBottom" class="touch-btn w-full bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-black text-xl py-3 rounded-2xl border-2 border-cyan-300">
+                CLOSE CHEAT SHEET
+            </button>
+        </div>
+    </div>
+
+    <!-- GAME OVER / VICTORY MODAL -->
+    <div id="gameOverModal" class="hidden fixed inset-0 z-[99999] bg-slate-950/90 backdrop-blur-md p-4 sm:p-8 flex justify-center items-center">
+        <div class="bg-slate-800 border-4 border-amber-500 rounded-3xl p-6 sm:p-10 max-w-2xl w-full text-center shadow-2xl">
+            <div class="text-5xl sm:text-7xl mb-2">🏆</div>
+            <h2 id="gameOverTitle" class="text-3xl sm:text-5xl font-black text-amber-400 mb-2">CHALLENGE COMPLETE!</h2>
+            <p id="gameOverGrade" class="text-xl sm:text-3xl font-bold text-slate-200 mb-4">Grade: S Class Ledger Legend</p>
+            
+            <div class="bg-slate-900 border-2 border-slate-700 p-6 rounded-2xl mb-6 flex justify-around items-center">
+                <div>
+                    <span class="text-slate-400 text-xs sm:text-sm uppercase font-bold block">Final Score</span>
+                    <span id="finalScoreVal" class="text-3xl sm:text-5xl font-black text-cyan-400">0</span>
+                </div>
+                <div class="h-10 w-0.5 bg-slate-700"></div>
+                <div>
+                    <span class="text-slate-400 text-xs sm:text-sm uppercase font-bold block">Accuracy</span>
+                    <span id="finalAccuracyVal" class="text-3xl sm:text-5xl font-black text-emerald-400">100%</span>
+                </div>
+            </div>
+
+            <button id="btnPlayAgain" class="touch-btn w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-2xl py-4 rounded-2xl border-2 border-amber-300 shadow-xl mb-3">
+                PLAY AGAIN
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // --- 1. SQA NATIONAL 5 DATABASE (34 OFFICIAL TERMS) ---
+        const SQA_TERMS = [
+            // Non-Current Assets
+            { name: "Premises", cat: "NCA", catName: "Non-Current Assets", balance: "DEBIT", hint: "Land and buildings owned long-term by the business.", examNote: "Recorded at historical cost on the Statement of Financial Position." },
+            { name: "Machinery & Equipment", cat: "NCA", catName: "Non-Current Assets", balance: "DEBIT", hint: "Factory tools, equipment, and production machinery.", examNote: "Depreciated annually over its estimated useful life." },
+            { name: "Delivery Vans & Vehicles", cat: "NCA", catName: "Non-Current Assets", balance: "DEBIT", hint: "Transport vehicles owned and used for business operations.", examNote: "Always classified under Non-Current Assets." },
+            { name: "Fixtures & Fittings", cat: "NCA", catName: "Non-Current Assets", balance: "DEBIT", hint: "Shelving, display units, counters, and lighting units.", examNote: "Long-term internal hardware fitted into the premises." },
+
+            // Current Assets
+            { name: "Inventory", cat: "CA", catName: "Current Assets", balance: "DEBIT", hint: "Unsold stock held for resale at period end.", examNote: "SQA exam rule: Always use 'Inventory' instead of 'Stock'." },
+            { name: "Trade Receivables", cat: "CA", catName: "Current Assets", balance: "DEBIT", hint: "Money owed to the business by credit customers.", examNote: "SQA exam rule: Always use 'Trade Receivables' instead of 'Debtors'." },
+            { name: "Bank Balance (Positive)", cat: "CA", catName: "Current Assets", balance: "DEBIT", hint: "Positive cash funds held in the business bank account.", examNote: "When positive, Bank is a Current Asset with a Debit balance." },
+            { name: "Cash in Till / Petty Cash", cat: "CA", catName: "Current Assets", balance: "DEBIT", hint: "Physical currency held on the business premises.", examNote: "Liquid current asset." },
+            { name: "Prepayments", cat: "CA", catName: "Current Assets", balance: "DEBIT", hint: "Expenses paid in advance for the next financial period.", examNote: "Prepaid expenses are Current Assets because the business is owed a future benefit." },
+            { name: "Accrued Income", cat: "CA", catName: "Current Assets", balance: "DEBIT", hint: "Income earned during the year but not yet received.", examNote: "Classified as a Current Asset on the Statement of Financial Position." },
+
+            // Current Liabilities
+            { name: "Trade Payables", cat: "CL", catName: "Current Liabilities", balance: "CREDIT", hint: "Money owed by the business to credit suppliers.", examNote: "SQA exam rule: Always use 'Trade Payables' instead of 'Creditors'." },
+            { name: "Bank Overdraft", cat: "CL", catName: "Current Liabilities", balance: "CREDIT", hint: "Overdrawn bank account balance owed back short-term.", examNote: "Short-term debt owing to the bank = Current Liability." },
+            { name: "Accrued Expenses", cat: "CL", catName: "Current Liabilities", balance: "CREDIT", hint: "Expenses incurred during the period that remain unpaid.", examNote: "Unpaid utility bills or wages owing at year-end are Current Liabilities." },
+            { name: "Prepaid Income", cat: "CL", catName: "Current Liabilities", balance: "CREDIT", hint: "Income received in advance before providing the service.", examNote: "Unearned income creates an obligation to deliver = Current Liability." },
+
+            // Non-Current Liabilities
+            { name: "Bank Loan (5 Year)", cat: "NCL", catName: "Non-Current Liabilities", balance: "CREDIT", hint: "Long-term loan borrowed from a bank due after 1+ year.", examNote: "Repayable after more than 12 months = Non-Current Liability." },
+            { name: "Mortgage", cat: "NCL", catName: "Non-Current Liabilities", balance: "CREDIT", hint: "Long-term loan secured against commercial property/land.", examNote: "Always classified under Non-Current Liabilities." },
+
+            // Revenue / Income
+            { name: "Sales Revenue", cat: "REV", catName: "Revenue / Income", balance: "CREDIT", hint: "Total money generated from selling goods or services.", examNote: "Primary trading income at the top of the Income Statement." },
+            { name: "Rent Received", cat: "REV", catName: "Revenue / Income", balance: "CREDIT", hint: "Income earned by sub-letting part of the premises.", examNote: "Added to Gross Profit as Other Income." },
+            { name: "Commission Received", cat: "REV", catName: "Revenue / Income", balance: "CREDIT", hint: "Bonus earnings for selling goods on behalf of third parties.", examNote: "Non-trading income added to Gross Profit." },
+            { name: "Discount Received", cat: "REV", catName: "Revenue / Income", balance: "CREDIT", hint: "Price reduction granted by suppliers for prompt payment.", examNote: "Treated as Other Income in the Income Statement." },
+            { name: "Profit on Sale of Asset", cat: "REV", catName: "Revenue / Income", balance: "CREDIT", hint: "Gain made when selling an asset for more than its book value.", examNote: "Added to Gross Profit as extra income." },
+
+            // Purchases & Cost of Sales
+            { name: "Purchases", cat: "COS", catName: "Purchases & Cost of Sales", balance: "DEBIT", hint: "Cost of buying inventory goods intended for resale.", examNote: "Core component inside Cost of Sales." },
+            { name: "Carriage Inwards", cat: "COS", catName: "Purchases & Cost of Sales", balance: "DEBIT", hint: "Delivery cost to bring purchased goods INTO the business.", examNote: "CRITICAL SQA DISTINCTION: Carriage Inwards is ADDED to Purchases inside Cost of Sales." },
+            { name: "Returns Outwards", cat: "COS", catName: "Purchases & Cost of Sales", balance: "CREDIT", hint: "Purchased stock returned BACK to suppliers.", examNote: "CRITICAL SQA DISTINCTION: Returns Outwards is DEDUCTED from Purchases inside Cost of Sales." },
+
+            // Operating Expenses
+            { name: "Carriage Outwards", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Delivery cost of sending goods OUT to customers.", examNote: "CRITICAL SQA DISTINCTION: Carriage Outwards is an Operating Expense (NOT in Cost of Sales)." },
+            { name: "Returns Inwards", cat: "REV", catName: "Revenue / Income", balance: "DEBIT", hint: "Goods returned BY customers due to faults/incorrect orders.", examNote: "CRITICAL SQA DISTINCTION: Returns Inwards has a DEBIT balance and reduces Sales Revenue." },
+            { name: "Wages & Salaries", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Payroll expenses paid to employees for work performed.", examNote: "Operating overhead expense." },
+            { name: "Rent, Rates & Insurance", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Premises rental, council rates, and insurance premiums.", examNote: "Deducted from Gross Profit under Expenses." },
+            { name: "Heating & Lighting", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Electricity, gas, and utility overhead costs.", examNote: "Standard operating expense." },
+            { name: "Advertising & Marketing", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Promotional expenditure to generate sales.", examNote: "Operating expense." },
+            { name: "Bad Debts Written Off", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Uncollectible customer debts written off as losses.", examNote: "Operating expense in the Income Statement." },
+            { name: "Depreciation Expense", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Annual loss of value on non-current assets.", examNote: "Operating expense deducted from Gross Profit." },
+            { name: "Discount Allowed", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Cash discount granted to credit customers for quick payment.", examNote: "Operating expense deducted from Gross Profit." },
+            { name: "Loss on Sale of Asset", cat: "EXP", catName: "Operating Expenses", balance: "DEBIT", hint: "Loss incurred when an asset is sold below book value.", examNote: "Operating expense." },
+
+            // Capital & Drawings
+            { name: "Capital", cat: "CAP", catName: "Capital & Drawings", balance: "CREDIT", hint: "Funds invested into the business by the owner.", examNote: "Capital has a CREDIT balance (CLIC rule)." },
+            { name: "Drawings", cat: "CAP", catName: "Capital & Drawings", balance: "DEBIT", hint: "Cash or stock taken by the owner for personal use.", examNote: "Drawings has a DEBIT balance (DEAD rule) and reduces Capital." }
+        ];
+
+        // --- 2. WEB AUDIO SYNTHESIZER ENGINE ---
+        let audioCtx = null;
+        function getAudioContext() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (AudioContextClass) {
+                    audioCtx = new AudioContextClass();
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        const Sound = {
+            playCorrect() {
+                if (!gameState.soundEnabled) return;
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(523.25, now); // C5
+                osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            },
+            playIncorrect() {
+                if (!gameState.soundEnabled) return;
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(110, now + 0.25);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            },
+            playClick() {
+                if (!gameState.soundEnabled) return;
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const now = ctx.currentTime;
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.04);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(now);
+                osc.stop(now + 0.04);
+            },
+            playWin() {
+                if (!gameState.soundEnabled) return;
+                const ctx = getAudioContext();
+                if (!ctx) return;
+                const notes = [440, 554.37, 659.25, 880];
+                notes.forEach((freq, idx) => {
+                    const now = ctx.currentTime + idx * 0.1;
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(freq, now);
+                    gain.gain.setValueAtTime(0.25, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(now);
+                    osc.stop(now + 0.3);
+                });
+            }
+        };
+
+        // --- 3. HTML5 CANVAS CONFETTI ENGINE ---
+        const Confetti = {
+            canvas: document.getElementById('confettiCanvas'),
+            ctx: document.getElementById('confettiCanvas').getContext('2d'),
+            particles: [],
+            animId: null,
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            },
+            launch() {
+                this.resize();
+                this.particles = [];
+                const colors = ['#38bdf8', '#fbbf24', '#10b981', '#f43f5e', '#a855f7'];
+                for (let i = 0; i < 90; i++) {
+                    this.particles.push({
+                        x: window.innerWidth / 2,
+                        y: window.innerHeight / 2,
+                        vx: (Math.random() - 0.5) * 16,
+                        vy: (Math.random() - 0.7) * 16,
+                        size: Math.random() * 10 + 6,
+                        color: colors[Math.floor(Math.random() * colors.length)],
+                        rotation: Math.random() * 360,
+                        rSpeed: (Math.random() - 0.5) * 10,
+                        life: 1
+                    });
+                }
+                if (!this.animId) this.loop();
+            },
+            loop() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                let alive = false;
+                this.particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.3; // gravity
+                    p.rotation += p.rSpeed;
+                    p.life -= 0.012;
+                    if (p.life > 0) {
+                        alive = true;
+                        this.ctx.save();
+                        this.ctx.translate(p.x, p.y);
+                        this.ctx.rotate((p.rotation * Math.PI) / 180);
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.globalAlpha = Math.max(0, p.life);
+                        this.ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                        this.ctx.restore();
+                    }
+                });
+                if (alive) {
+                    this.animId = requestAnimationFrame(() => this.loop());
+                } else {
+                    this.animId = null;
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+            }
+        };
+
+        // --- 4. GAME STATE MANAGEMENT ---
+        let gameState = {
+            mode: 'practice', // 'practice', 'timed', 'team'
+            terms: [],
+            currentIndex: 0,
+            score: 0,
+            streak: 0,
+            stage: 1, // 1: Category, 2: Balance (Dr/Cr)
+            stage1Choice: null,
+            soundEnabled: true,
+            
+            // Timed mode
+            timeLeft: 60,
+            timerInterval: null,
+            totalAnswered: 0,
+            correctCount: 0,
+
+            // Team mode
+            teamRedScore: 0,
+            teamBlueScore: 0,
+            currentTeam: 'RED' // 'RED' or 'BLUE'
+        };
+
+        // DOM Element Cache
+        const DOM = {
+            btnToggleFullscreen: document.getElementById('btnToggleFullscreen'),
+            btnPopOutTab: document.getElementById('btnPopOutTab'),
+            fullscreenText: document.getElementById('fullscreenText'),
+            fullscreenIconContainer: document.getElementById('fullscreenIconContainer'),
+            btnToggleSound: document.getElementById('btnToggleSound'),
+            soundText: document.getElementById('soundText'),
+            soundIconContainer: document.getElementById('soundIconContainer'),
+            btnOpenCheatSheet: document.getElementById('btnOpenCheatSheet'),
+            btnCloseCheatSheet: document.getElementById('btnCloseCheatSheet'),
+            btnCloseCheatSheetBottom: document.getElementById('btnCloseCheatSheetBottom'),
+            cheatSheetModal: document.getElementById('cheatSheetModal'),
+            gameOverModal: document.getElementById('gameOverModal'),
+            btnPlayAgain: document.getElementById('btnPlayAgain'),
+
+            // Mode Buttons
+            btnModePractice: document.getElementById('btnModePractice'),
+            btnModeTimed: document.getElementById('btnModeTimed'),
+            btnModeTeam: document.getElementById('btnModeTeam'),
+
+            // Stats
+            standardStats: document.getElementById('standardStats'),
+            timedStats: document.getElementById('timedStats'),
+            teamStats: document.getElementById('teamStats'),
+            scoreVal: document.getElementById('scoreVal'),
+            streakVal: document.getElementById('streakVal'),
+            progressVal: document.getElementById('progressVal'),
+            timerProgressBar: document.getElementById('timerProgressBar'),
+            timerText: document.getElementById('timerText'),
+            teamRedScore: document.getElementById('teamRedScore'),
+            teamBlueScore: document.getElementById('teamBlueScore'),
+            teamTurnBanner: document.getElementById('teamTurnBanner'),
+            teamRedBox: document.getElementById('teamRedBox'),
+            teamBlueBox: document.getElementById('teamBlueBox'),
+
+            // Game Cards & Grids
+            termTitle: document.getElementById('termTitle'),
+            termPrompt: document.getElementById('termPrompt'),
+            stageBadge: document.getElementById('stageBadge'),
+            hintBox: document.getElementById('hintBox'),
+            hintText: document.getElementById('hintText'),
+            btnToggleHint: document.getElementById('btnToggleHint'),
+
+            stage1CategoryGrid: document.getElementById('stage1CategoryGrid'),
+            stage2BalanceGrid: document.getElementById('stage2BalanceGrid'),
+            btnSelectDebit: document.getElementById('btnSelectDebit'),
+            btnSelectCredit: document.getElementById('btnSelectCredit'),
+
+            // Feedback Panel
+            feedbackPanel: document.getElementById('feedbackPanel'),
+            feedbackBanner: document.getElementById('feedbackBanner'),
+            feedbackExplanation: document.getElementById('feedbackExplanation'),
+            feedbackExamNote: document.getElementById('feedbackExamNote'),
+            examNoteText: document.getElementById('examNoteText'),
+            btnNextTerm: document.getElementById('btnNextTerm'),
+
+            // Game Over
+            gameOverTitle: document.getElementById('gameOverTitle'),
+            gameOverGrade: document.getElementById('gameOverGrade'),
+            finalScoreVal: document.getElementById('finalScoreVal'),
+            finalAccuracyVal: document.getElementById('finalAccuracyVal')
+        };
+
+        // --- 5. GOOGLE SITES & STANDALONE TAB POP-OUT ENGINE ---
+        function launchStandaloneTab() {
+            Sound.playClick();
+            try {
+                // If loaded inside Google Sites or sandboxed iframe
+                if (window.location.href && !window.location.href.startsWith('about:')) {
+                    window.open(window.location.href, '_blank');
+                } else {
+                    // Fallback for raw srcdoc sandboxes
+                    const htmlContent = document.documentElement.outerHTML;
+                    const blob = new Blob([htmlContent], { type: 'text/html' });
+                    const blobUrl = URL.createObjectURL(blob);
+                    window.open(blobUrl, '_blank');
+                }
+            } catch (e) {
+                console.warn("Pop-out tab fallback execution:", e);
+                window.open(window.location.href, '_blank');
+            }
+        }
+
+        // --- 6. DUAL-MODE FULLSCREEN ENGINE ---
+        let isSimulatedFullscreen = false;
+
+        function toggleFullscreen() {
+            Sound.playClick();
+            const isNativeFS = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+            
+            if (isNativeFS || isSimulatedFullscreen) {
+                exitFullscreen();
+            } else {
+                enterFullscreen();
+            }
+        }
+
+        function enterFullscreen() {
+            const elem = document.documentElement;
+            const req = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.mozRequestFullScreen || elem.msRequestFullscreen;
+
+            if (req) {
+                try {
+                    const promise = req.call(elem);
+                    if (promise && typeof promise.then === 'function') {
+                        promise.then(() => {
+                            updateFullscreenUI(true);
+                        }).catch(err => {
+                            console.warn("Native iframe fullscreen restricted by Google Sites sandbox. Activating CSS full-window mode.", err);
+                            activateSimulatedFullscreen();
+                        });
+                        return;
+                    }
+                    updateFullscreenUI(true);
+                    return;
+                } catch (err) {
+                    console.warn("Native fullscreen exception. Falling back to CSS simulated fullscreen.", err);
+                }
+            }
+            activateSimulatedFullscreen();
+        }
+
+        function activateSimulatedFullscreen() {
+            isSimulatedFullscreen = true;
+            document.body.classList.add('simulated-fullscreen');
+            updateFullscreenUI(true);
+        }
+
+        function exitFullscreen() {
+            if (isSimulatedFullscreen) {
+                isSimulatedFullscreen = false;
+                document.body.classList.remove('simulated-fullscreen');
+                updateFullscreenUI(false);
+            }
+
+            const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+            if (exit && (document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement)) {
+                try {
+                    const promise = exit.call(document);
+                    if (promise && typeof promise.then === 'function') {
+                        promise.catch(() => {});
+                    }
+                } catch (e) {}
+            }
+            updateFullscreenUI(false);
+        }
+
+        function updateFullscreenUI(active) {
+            if (active) {
+                DOM.fullscreenText.textContent = "Exit Full Screen";
+                DOM.fullscreenIconContainer.innerHTML = `
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 15L4 20m0 0h4m-4 0v-4m11 4l5-5m-5 5v-4m5 4h-4M9 9L4 4m0 0h4m-4 0v4m11-4l5 5m-5-5v4m5-4h-4"/>
+                    </svg>`;
+            } else {
+                DOM.fullscreenText.textContent = "Full Screen";
+                DOM.fullscreenIconContainer.innerHTML = `
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/>
+                    </svg>`;
+            }
+        }
+
+        // --- 7. GAME CONTROLLER LOGIC ---
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        function startNewGame(mode) {
+            Sound.playClick();
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+
+            gameState.mode = mode;
+            gameState.terms = shuffle(SQA_TERMS);
+            gameState.currentIndex = 0;
+            gameState.score = 0;
+            gameState.streak = 0;
+            gameState.totalAnswered = 0;
+            gameState.correctCount = 0;
+            gameState.teamRedScore = 0;
+            gameState.teamBlueScore = 0;
+            gameState.currentTeam = 'RED';
+
+            // Update Mode Selector UI
+            [DOM.btnModePractice, DOM.btnModeTimed, DOM.btnModeTeam].forEach(btn => {
+                btn.className = "touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-slate-600 bg-slate-700/50 text-slate-300 transition shadow-md";
+            });
+
+            if (mode === 'practice') {
+                DOM.btnModePractice.className = "touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-cyan-500 bg-cyan-600/30 text-cyan-300 transition shadow-md";
+                DOM.standardStats.classList.remove('hidden');
+                DOM.timedStats.classList.add('hidden');
+                DOM.teamStats.classList.add('hidden');
+            } else if (mode === 'timed') {
+                DOM.btnModeTimed.className = "touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-amber-500 bg-amber-600/30 text-amber-300 transition shadow-md";
+                DOM.standardStats.classList.remove('hidden');
+                DOM.timedStats.classList.remove('hidden');
+                DOM.teamStats.classList.add('hidden');
+                startTimer();
+            } else if (mode === 'team') {
+                DOM.btnModeTeam.className = "touch-btn mode-btn flex-1 min-w-[140px] py-3 px-4 rounded-xl font-extrabold text-base sm:text-lg border-2 border-purple-500 bg-purple-600/30 text-purple-300 transition shadow-md";
+                DOM.standardStats.classList.add('hidden');
+                DOM.timedStats.classList.add('hidden');
+                DOM.teamStats.classList.remove('hidden');
+                updateTeamUI();
+            }
+
+            DOM.gameOverModal.classList.add('hidden');
+            loadCurrentTerm();
+        }
+
+        function startTimer() {
+            gameState.timeLeft = 60;
+            DOM.timerText.textContent = "60s";
+            DOM.timerProgressBar.style.width = "100%";
+
+            gameState.timerInterval = setInterval(() => {
+                gameState.timeLeft--;
+                DOM.timerText.textContent = gameState.timeLeft + "s";
+                const pct = (gameState.timeLeft / 60) * 100;
+                DOM.timerProgressBar.style.width = pct + "%";
+
+                if (gameState.timeLeft <= 0) {
+                    clearInterval(gameState.timerInterval);
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function updateTeamUI() {
+            DOM.teamRedScore.textContent = gameState.teamRedScore;
+            DOM.teamBlueScore.textContent = gameState.teamBlueScore;
+
+            if (gameState.currentTeam === 'RED') {
+                DOM.teamTurnBanner.className = "bg-rose-600 text-white border-2 border-rose-300 px-6 py-3 rounded-2xl font-black text-lg sm:text-xl text-center shadow-lg w-full sm:w-auto animate-pulse";
+                DOM.teamTurnBanner.textContent = "🔥 TEAM RED'S TURN";
+                DOM.teamRedBox.className = "bg-rose-950/80 border-4 border-rose-500 rounded-2xl px-6 py-2 text-center flex-1 sm:flex-none glow-active";
+                DOM.teamBlueBox.className = "bg-blue-950/80 border-4 border-slate-700 opacity-60 rounded-2xl px-6 py-2 text-center flex-1 sm:flex-none";
+            } else {
+                DOM.teamTurnBanner.className = "bg-blue-600 text-white border-2 border-blue-300 px-6 py-3 rounded-2xl font-black text-lg sm:text-xl text-center shadow-lg w-full sm:w-auto animate-pulse";
+                DOM.teamTurnBanner.textContent = "⚡ TEAM BLUE'S TURN";
+                DOM.teamBlueBox.className = "bg-blue-950/80 border-4 border-blue-500 rounded-2xl px-6 py-2 text-center flex-1 sm:flex-none glow-active";
+                DOM.teamRedBox.className = "bg-rose-950/80 border-4 border-slate-700 opacity-60 rounded-2xl px-6 py-2 text-center flex-1 sm:flex-none";
+            }
+        }
+
+        function loadCurrentTerm() {
+            if (gameState.currentIndex >= gameState.terms.length) {
+                gameState.terms = shuffle(SQA_TERMS);
+                gameState.currentIndex = 0;
+            }
+
+            const term = gameState.terms[gameState.currentIndex];
+            gameState.stage = 1;
+            gameState.stage1Choice = null;
+
+            // Update UI Elements
+            DOM.termTitle.textContent = term.name;
+            DOM.stageBadge.textContent = "STAGE 1: CATEGORY";
+            DOM.stageBadge.className = "bg-indigo-600 text-white px-3 py-1 rounded-lg";
+            DOM.termPrompt.textContent = "Select the correct Statement of Financial Position or Income Statement category below:";
+            
+            DOM.hintBox.classList.add('hidden');
+            DOM.hintText.textContent = term.hint;
+            DOM.btnToggleHint.textContent = "💡 Show SQA Hint";
+
+            DOM.stage1CategoryGrid.classList.remove('hidden');
+            DOM.stage2BalanceGrid.classList.add('hidden');
+            DOM.feedbackPanel.classList.add('hidden');
+
+            updateStatsDisplay();
+        }
+
+        function updateStatsDisplay() {
+            DOM.scoreVal.textContent = gameState.score;
+            DOM.streakVal.textContent = `${gameState.streak} 🔥`;
+            DOM.progressVal.textContent = `${gameState.currentIndex + 1}/${gameState.terms.length}`;
+        }
+
+        function handleStage1Category(selectedCat) {
+            Sound.playClick();
+            const term = gameState.terms[gameState.currentIndex];
+            gameState.stage1Choice = selectedCat;
+
+            if (selectedCat === term.cat) {
+                // Correct Category -> Move to Stage 2 Balance
+                gameState.stage = 2;
+                DOM.stage1CategoryGrid.classList.add('hidden');
+                DOM.stage2BalanceGrid.classList.remove('hidden');
+
+                DOM.stageBadge.textContent = "STAGE 2: LEDGER BALANCE";
+                DOM.stageBadge.className = "bg-amber-500 text-slate-950 px-3 py-1 rounded-lg font-black";
+                DOM.termPrompt.textContent = `Correct Category (${term.catName})! Now select the Ledger Balance type:`;
+            } else {
+                // Incorrect Category -> Show immediate feedback
+                processFinalAnswer(false, `Wrong Category! ${term.name} belongs to ${term.catName}.`);
+            }
+        }
+
+        function handleStage2Balance(selectedBalance) {
+            const term = gameState.terms[gameState.currentIndex];
+            const isCorrect = (selectedBalance === term.balance);
+            
+            let message = "";
+            if (isCorrect) {
+                message = `Spot on! ${term.name} is a ${term.catName} with a ${term.balance} balance.`;
+            } else {
+                message = `Incorrect Balance! ${term.name} (${term.catName}) has a ${term.balance} balance.`;
+            }
+
+            processFinalAnswer(isCorrect, message);
+        }
+
+        function processFinalAnswer(isCorrect, explanation) {
+            gameState.totalAnswered++;
+            const term = gameState.terms[gameState.currentIndex];
+
+            DOM.stage1CategoryGrid.classList.add('hidden');
+            DOM.stage2BalanceGrid.classList.add('hidden');
+            DOM.feedbackPanel.classList.remove('hidden');
+
+            if (isCorrect) {
+                Sound.playCorrect();
+                gameState.score += 10 + Math.min(gameState.streak * 2, 20);
+                gameState.streak++;
+                gameState.correctCount++;
+
+                if (gameState.mode === 'team') {
+                    if (gameState.currentTeam === 'RED') gameState.teamRedScore += 10;
+                    else gameState.teamBlueScore += 10;
+                }
+
+                DOM.feedbackPanel.className = "bg-slate-800 border-4 border-emerald-500 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center gap-4 mb-16";
+                DOM.feedbackBanner.textContent = "✅ EXCELLENT! CORRECT!";
+                DOM.feedbackBanner.className = "text-3xl sm:text-5xl font-black text-emerald-400 uppercase tracking-wider";
+
+                if (gameState.streak % 5 === 0) Confetti.launch();
+            } else {
+                Sound.playIncorrect();
+                gameState.streak = 0;
+                DOM.feedbackPanel.className = "bg-slate-800 border-4 border-rose-500 rounded-3xl p-6 sm:p-8 shadow-2xl flex flex-col items-center text-center gap-4 mb-16";
+                DOM.feedbackBanner.textContent = "❌ INCORRECT";
+                DOM.feedbackBanner.className = "text-3xl sm:text-5xl font-black text-rose-400 uppercase tracking-wider";
+            }
+
+            // DEAD CLIC Explanation generator
+            let deadClicRule = "";
+            if (term.balance === "DEBIT") {
+                deadClicRule = `According to DEAD CLIC: Debits include Expenses, Assets, Drawings, & Direct Costs (D.E.A.D).`;
+            } else {
+                deadClicRule = `According to DEAD CLIC: Credits include Capital, Liabilities, Income, & Credit Adjustments (C.L.I.C).`;
+            }
+
+            DOM.feedbackExplanation.innerHTML = `${explanation}<br><span class="text-base sm:text-xl text-cyan-300 font-bold mt-2 block">${deadClicRule}</span>`;
+            DOM.examNoteText.textContent = term.examNote;
+
+            updateStatsDisplay();
+            if (gameState.mode === 'team') updateTeamUI();
+        }
+
+        function advanceNextTerm() {
+            Sound.playClick();
+            if (gameState.mode === 'team') {
+                gameState.currentTeam = (gameState.currentTeam === 'RED') ? 'BLUE' : 'RED';
+            }
+
+            gameState.currentIndex++;
+            if (gameState.currentIndex >= gameState.terms.length && gameState.mode === 'practice') {
+                endGame();
+            } else {
+                loadCurrentTerm();
+            }
+        }
+
+        function endGame() {
+            if (gameState.timerInterval) clearInterval(gameState.timerInterval);
+            Sound.playWin();
+            Confetti.launch();
+
+            const accuracy = gameState.totalAnswered > 0 
+                ? Math.round((gameState.correctCount / gameState.totalAnswered) * 100) 
+                : 100;
+
+            DOM.finalScoreVal.textContent = gameState.score;
+            DOM.finalAccuracyVal.textContent = accuracy + "%";
+
+            let grade = "C Grade - Keep Practicing";
+            if (accuracy >= 90 && gameState.score >= 100) grade = "🏆 S Class - N5 Ledger Master";
+            else if (accuracy >= 75) grade = "🥇 A Grade - Ledger Legend";
+            else if (accuracy >= 60) grade = "🥈 B Grade - Good Effort";
+
+            DOM.gameOverGrade.textContent = grade;
+            DOM.gameOverModal.classList.remove('hidden');
+        }
+
+        // --- 8. EVENT BINDINGS ---
+        function bindEvents() {
+            // Standalone Pop-Out Tab (Google Sites Solution)
+            DOM.btnPopOutTab.addEventListener('click', launchStandaloneTab);
+
+            // Fullscreen & Sound
+            DOM.btnToggleFullscreen.addEventListener('click', toggleFullscreen);
+            DOM.btnToggleSound.addEventListener('click', () => {
+                Sound.playClick();
+                gameState.soundEnabled = !gameState.soundEnabled;
+                if (gameState.soundEnabled) {
+                    DOM.soundText.textContent = "Sound";
+                    DOM.soundIconContainer.innerHTML = `
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15.536 8.464a5 5 0 010 7.072M18.364 5.636a9 9 0 010 12.728M11 5L6 9H2v6h4l5 4V5z"/>
+                        </svg>`;
+                } else {
+                    DOM.soundText.textContent = "Mute";
+                    DOM.soundIconContainer.innerHTML = `
+                        <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" stroke-dasharray="2 2"/>
+                        </svg>`;
+                }
+            });
+
+            // Native fullscreen change listeners
+            ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange'].forEach(evt => {
+                document.addEventListener(evt, () => {
+                    const active = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || document.msFullscreenElement);
+                    if (!active && !isSimulatedFullscreen) updateFullscreenUI(false);
+                    else if (active) updateFullscreenUI(true);
+                });
+            });
+
+            // ESC Key listener for simulated fullscreen
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape' && isSimulatedFullscreen) {
+                    exitFullscreen();
+                }
+            });
+
+            // Cheat Sheet Modal
+            const openModal = () => { Sound.playClick(); DOM.cheatSheetModal.classList.remove('hidden'); };
+            const closeModal = () => { Sound.playClick(); DOM.cheatSheetModal.classList.add('hidden'); };
+            DOM.btnOpenCheatSheet.addEventListener('click', openModal);
+            DOM.btnCloseCheatSheet.addEventListener('click', closeModal);
+            DOM.btnCloseCheatSheetBottom.addEventListener('click', closeModal);
+
+            // Mode Selector
+            DOM.btnModePractice.addEventListener('click', () => startNewGame('practice'));
+            DOM.btnModeTimed.addEventListener('click', () => startNewGame('timed'));
+            DOM.btnModeTeam.addEventListener('click', () => startNewGame('team'));
+
+            // SQA Hint Toggle
+            DOM.btnToggleHint.addEventListener('click', () => {
+                Sound.playClick();
+                const hidden = DOM.hintBox.classList.contains('hidden');
+                if (hidden) {
+                    DOM.hintBox.classList.remove('hidden');
+                    DOM.btnToggleHint.textContent = "🙈 Hide Hint";
+                } else {
+                    DOM.hintBox.classList.add('hidden');
+                    DOM.btnToggleHint.textContent = "💡 Show SQA Hint";
+                }
+            });
+
+            // Stage 1 Category Selection Buttons
+            document.querySelectorAll('.cat-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const cat = e.currentTarget.getAttribute('data-cat');
+                    handleStage1Category(cat);
+                });
+            });
+
+            // Stage 2 Balance Selection Buttons (Clean tiles without prompt subtext)
+            DOM.btnSelectDebit.addEventListener('click', () => handleStage2Balance('DEBIT'));
+            DOM.btnSelectCredit.addEventListener('click', () => handleStage2Balance('CREDIT'));
+
+            // Next Term & Play Again
+            DOM.btnNextTerm.addEventListener('click', advanceNextTerm);
+            DOM.btnPlayAgain.addEventListener('click', () => startNewGame(gameState.mode));
+
+            // Window resize for confetti
+            window.addEventListener('resize', () => Confetti.resize());
+        }
+
+        // Initialize App on Window Load
+        window.onload = function() {
+            bindEvents();
+            startNewGame('practice');
+        };
+    </script>
+</body>
+</html>
